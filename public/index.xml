@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Even - A super concise theme for Hugo</title>
+    <link>http://localhost:1313/</link>
+    <description>Recent content on Even - A super concise theme for Hugo</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Fri, 29 Nov 2024 15:27:00 +0800</lastBuildDate>
+    <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Lifetime in Rust</title>
+      <link>http://localhost:1313/post/life-time-in-rust/</link>
+      <pubDate>Fri, 29 Nov 2024 15:27:00 +0800</pubDate>
+      <guid>http://localhost:1313/post/life-time-in-rust/</guid>
+      <description>&lt;p&gt;Every value(or data) in Rust have a lifetime, it starts from the value was created, ends at the owner of the value is dropped. The lifetime discussed most is the liftime of a reference. According to &lt;a href=&#34;https://rust-lang.github.io/rfcs/2094-nll.html&#34;&gt;Rust RFC 2094: Non-lexical Lifetimes&lt;/a&gt;:&lt;/p&gt;&#xA;&lt;blockquote&gt;&#xA;&lt;ol&gt;&#xA;&lt;li&gt;The lifetime of a reference, corresponding to the span of time in which that reference is used.&lt;/li&gt;&#xA;&lt;li&gt;The lifetime of a value, corresponding to the span of time before that value gets freed (or, put another way, before the destructor for the value runs).&lt;/li&gt;&#xA;&lt;/ol&gt;&#xA;&lt;/blockquote&gt;&#xA;&lt;p&gt;The distinguish the two, the lifetime of value will be refered as &lt;strong&gt;scope of the value&lt;/strong&gt;. The liftime of a reference cannot outlive the scope of the value it referes to. Let&amp;rsquo;s see an exmaple:&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
