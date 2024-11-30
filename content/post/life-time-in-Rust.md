@@ -94,7 +94,7 @@ fn main() {
 -   at line 4, the variable `v` is assigned a new value, the assignment runs the destructor of the value previously pointed to by this variable[^fn:2]. Because `a` still contains a reference to the old `Box<i32>`, this reference is invalidated.
 
 
-### View Lifetime as Data Flow {#view-lifetime-as-data-flow}
+## View Lifetime as Data Flow {#view-lifetime-as-data-flow}
 
 In the book _Rust for Rustaceans[^fn:3]_, Jon Gjengset proposed a different approach to think about lifetimes:
 
