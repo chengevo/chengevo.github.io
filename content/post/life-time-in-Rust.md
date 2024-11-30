@@ -4,12 +4,12 @@ publishDate = 2024-11-29T15:27:00+08:00
 draft = false
 +++
 
-Every value(or data) in Rust have a lifetime, it starts from the value was created, ends at the owner of the value is dropped. The lifetime discussed most is the liftime of a reference. According to [Rust RFC 2094: Non-lexical Lifetimes](https://rust-lang.github.io/rfcs/2094-nll.html):
+Lifetime is a complex and often confusing concept in Rust. When discussing lifetimes, we usually refer to the lifetime of  references. However, the concept of lifetime is not restricted to references. Variables and data in Rust also have lifetimes.  We’ll discuss the lifetime of variables later. For now, let’s start with the lifetime of data and references. [Rust RFC 2094: Non-lexical Lifetimes](https://rust-lang.github.io/rfcs/2094-nll.html) provides precise definitions for these two types of lifetimes:
 
 > 1.  The lifetime of a reference, corresponding to the span of time in which that reference is used.
 > 2.  The lifetime of a value, corresponding to the span of time before that value gets freed (or, put another way, before the destructor for the value runs).
 
-The distinguish the two, the lifetime of value will be refered as **scope of the value**. The liftime of a reference cannot outlive the scope of the value it referes to. Let's see an exmaple:
+To distinguish the two, the lifetime of a value will be referred to as the\*scope of the value\*. The lifetime of a reference cannot outlive the scope of the value it refers to. Let’s see an example:
 
 ```rust { linenos=true, linenostart=1, anchorlinenos=true, lineanchors=org-coderef--9c6c47 }
 fn main() {
@@ -19,13 +19,13 @@ fn main() {
 }
 ```
 
--   line [2](#org-coderef--9c6c47-2) creates a value, which is a vector, the scope of this values lasts from line [2](#org-coderef--9c6c47-2) to line [4](#org-coderef--9c6c47-4)
--   line [3](#org-coderef--9c6c47-3) creates an reference to the value `v` (`len()` method takes an immutable reference), the lifetime of this reference is confined to this line
+-   line [2](#org-coderef--9c6c47-2) creates a value, which is a vector. The scope of this value lasts from line [2](#org-coderef--9c6c47-2) to line [4](#org-coderef--9c6c47-4).
+-   line [3](#org-coderef--9c6c47-3) creates a reference to the value `v` (`len()` method takes an immutable reference). The lifetime of this reference is confined to this line.
 
 
-## <span class="section-num">1</span> The lifetiem of a variable {#the-lifetiem-of-a-variable}
+## The Lifetime of a Variable {#the-lifetime-of-a-variable}
 
-If a variable is binded with a reference, that variable also has a lifetime, which is the scope of code that it can safely be dereferenced[^fn:1]. Let's see an example:
+If a variable is bound to a reference, that variable also has a lifetime, defined as the span of code in which it can safely be dereferenced[^fn:1]. Let's see an example:
 
 <a id="code-snippet--lifetime-variable"></a>
 ```rust { linenos=true, linenostart=1, anchorlinenos=true, lineanchors=org-coderef--362c91 }
@@ -40,14 +40,14 @@ fn main() {
 }
 ```
 
-1.  `&b` creates an reference, which has an lifetime `'b`
-2.  `&c` creates an reference, which has an lifetime `'c`
-3.  variable `a` is binded to a reference to a `Vec<i32>`, it's lifetime `'a` spans from line [3](#org-coderef--9c6c47-3) to line [8](#org-coderef--362c91-8), which is the union of `'b` and `'c`.
+1.  `&b` creates a reference with a lifetime of `'b`
+2.  `&c` creates a reference with a lifetime of `'c`
+3.  the variable `a` is bound to a reference to a `Vec<i32>`. It's lifetime, `'a` spans from line [3](#org-coderef--9c6c47-3) to line [8](#org-coderef--362c91-8), which is the union of `'b` and `'c`.
 
 
-## <span class="section-num">2</span> Variable, value and reference {#variable-value-and-reference}
+## Variable, value and reference {#variable-value-and-reference}
 
-The book "The Rust Programming Language" gives an example to introduce the concept lifetime:
+The book "The Rust Programming Language" provides an example to introduce the concept of lifetimes:
 
 ```rust { linenos=true, linenostart=1, anchorlinenos=true, lineanchors=org-coderef--d0315f }
 fn main() {
@@ -62,24 +62,24 @@ fn main() {
 }                         // ---------+
 ```
 
-This is how the book explain this code block:
+This is how the book explains this code block:
 
 > Here, we’ve annotated the lifetime of r with 'a and the lifetime of x with 'b. As you can see, the inner 'b block is much smaller than the outer 'a lifetime block. At compile time, Rust compares the size of the two lifetimes and sees that r has a lifetime of 'a but that it refers to memory with a lifetime of 'b. The program is rejected because 'b is shorter than 'a: the subject of the reference doesn’t live as long as the reference.
 
-This explaination kind of mixed the three concept together:
+This explanation mixes three concepts:
 
 -   lifetime of a refernce: `&x`
 -   lifetime of a variable: `'a`
 -   the scope of a value: `'b`
 
-I think a better explaination of this example is:
+A clearer explanation might be:
 
--   variable `r` binds to a reference to a `i32`, its lifetime spans from line 2 (when it's initialized) to line [3](#org-coderef--9c6c47-3)
--   at line [[out_scope_value] [(a)], a reference to `x` is created and assigned to variable `r`. The lifetime of this reference `'b` confined to this line because at line [4](#org-coderef--9c6c47-4) the inner scope ended, which invalidates this reference.
--   the compiler rejected the code at line [3](#org-coderef--9c6c47-3) because it tries to access an invalid reference
+-   variable `r` binds to a reference to a `i32`, andits lifetime spans from line 2 (when it's initialized) to line [3](#org-coderef--9c6c47-3)
+-   at line [[out_scope_value] [(a)], a reference to `x` is created and assigned to variable `r`. The lifetime of this reference `'b` , is confined to this line because at line [4](#org-coderef--9c6c47-4) the inner scope ends, invalidating the reference.
+-   the compiler rejects the code at line [3](#org-coderef--9c6c47-3) because it tries to access an invalid reference
 
 
-## <span class="section-num">3</span> Assignment operator invalidates a reference {#assignment-operator-invalidates-a-reference}
+## Assignment Operator Invalidates a Reference {#assignment-operator-invalidates-a-reference}
 
 ```rust
 fn main() {
@@ -91,14 +91,14 @@ fn main() {
 ```
 
 -   variable `a` contains a reference to a `Box<i32>`
--   at line 4 the variable `v` is assigned to a new value, the assignment runs the destructor of value this variable previously points to[^fn:2]. Because `a` still contains a reference to the old `Box<i32>`, this reference is invalidated
+-   at line 4, the variable `v` is assigned a new value, the assignment runs the destructor of the value previously pointed to by this variable[^fn:2]. Because `a` still contains a reference to the old `Box<i32>`, this reference is invalidated.
 
 
-## <span class="section-num">4</span> View lifetime as data flow {#view-lifetime-as-data-flow}
+### View Lifetime as Data Flow {#view-lifetime-as-data-flow}
 
-In the book _Rust for Rustaceans[^fn:3]_, Jon Gjengset proposed a different approach to think about lifetime:
+In the book _Rust for Rustaceans[^fn:3]_, Jon Gjengset proposed a different approach to think about lifetimes:
 
-> It(borrow checker) does this by tracing the path back to where 'a starts—where the reference was taken—from the point of use and checking that there are no conflicting uses along that path.
+> It(theborrow checker) does this by tracing the path back to where 'a starts—where the reference was taken—from the point of use and checking that there are no conflicting uses along that path.
 
 ```rust { linenos=true, linenostart=1, anchorlinenos=true, lineanchors=org-coderef--734273 }
 fn main() {
@@ -116,15 +116,15 @@ fn main() {
 ```
 
 -   the liftime `'a` starts at line [3](#org-coderef--734273-3) when a reference to `v` is created. It spans from line [3](#org-coderef--734273-3) to line [6](#org-coderef--734273-6).
--   `'a` ends at line [7](#org-coderef--734273-7) because the [assignment operator](#assignment-operator-invalidates-a-reference) destroyed the Box `a` referes to
+-   `'a` ends at line [7](#org-coderef--734273-7) because the [assignment operator](#assignment-operator-invalidates-a-reference) destroyed the Box `a` refers to
 -   `'a` starts again when variable `a` is updated at line [8](#org-coderef--734273-8)
-    -   if the code loops back to line [6](#org-coderef--734273-6), `a` still has a valid reference. The lifetime `'a` will ended at line [6](#org-coderef--734273-6) again, and begins next create then destroyed cycle.
-    -   if the code continues to the final print statement, `a` has a valid reference too, the lifetime `'a` now spans from line [8](#org-coderef--734273-8) to [11](#org-coderef--734273-11).
+    -   if the code loops back to line [6](#org-coderef--734273-6), `a` still has a valid reference. The lifetime `'a` will end at line [6](#org-coderef--734273-6) again and begin the next create-then-destroy cycle.
+    -   if the code continues to the final print statement, `a` still has a valid reference . The lifetime `'a` now spans from line [8](#org-coderef--734273-8) to [11](#org-coderef--734273-11).
 
 
-## <span class="section-num">5</span> The scope of a lifetime {#the-scope-of-a-lifetime}
+## The Scope of a Lifetime {#the-scope-of-a-lifetime}
 
-The lifetime of a reference last only for those portions of the function in which the reference may later be used[^fn:4], instead of as large as the entire scope of the variable, which usually stretch to the end of the code block. With that in mind, let's look at the following code.
+The lifetime of a reference lasts only for those portions of the function in which the reference may later be used[^fn:4], instead of encompassing the entire scope of the variable, which usually stretches to the end of the code block. Consider the following code:
 
 ```rust
 fn main() {
@@ -135,18 +135,18 @@ fn main() {
 }
 ```
 
-At line 3, we takes a mutable reference to `v`, the lifetime of this lifetime `'a` lasts from line 3 to line 4. Because this reference is last used in line 4, so the compiler considers the lifetime ends here, instead of line 6.
+At line 3, we take a mutable reference to `v`. The lifetime  `'a` lasts from line 3 to line 4. Because this reference is last used in line 4,  the compiler considers the lifetime to end here instead of extending to line 6.
 
-Having understanding the scope of a reference, we can now make the borrowing rules more sprcific:
+Understanding the scope of a reference allows us to refine the borrowing rules :
 
 1.  **At runtime**, you can have either one mutable reference or any number of immutable references to access a value
-2.  there can be multiple mutable reference existing in the same block, as long as their lifetime doens't overlaps
-3.  a mutable reference and immutable references can exists in the same block only if the lifetime of immutable references does not overlap with the lifetime of the mutable reference
+2.  there can be multiple mutable references existing in the same block, as long as their lifetimes don't overlap.
+3.  a mutable reference and immutable references can exist in the same block only if the lifetimes of the immutable references do not overlap with the lifetime of the mutable reference
 
-Let's play around with more examples.
+Let's explore more examples.
 
 
-### Examples violating borrowing rules {#examples-violating-borrowing-rules}
+### Examples Violating Borrowing Rules {#examples-violating-borrowing-rules}
 
 ```rust
 let mut s = String::from("hello");
@@ -167,7 +167,7 @@ println!("{:?}", first);
 ```
 
 
-### Examples adhere to borrowing rules {#examples-adhere-to-borrowing-rules}
+### Examples Adhering to Borrowing Rules {#examples-adhering-to-borrowing-rules}
 
 ```rust
 let mut s = String::from("hello");
@@ -176,16 +176,16 @@ let r2 = &s;
 println!("{r1}, {r2}"); // lifetime of r1 and r2 ends here
 
 let r3 = &mut s;  // lifetime of r3 starts here
-println!("{r3}"); // lifetime of  r3 ends here, not overlaping with immutables references
+println!("{r3}"); // lifetime of  r3 ends here, not overlapping with immutable references
 ```
 
 
-## <span class="section-num">6</span> Multiple generic lifetimes {#multiple-generic-lifetimes}
+## Multiple generic lifetimes {#multiple-generic-lifetimes}
 
-There are times when multiple generic lifetime is necessary, either in a function or in a struct. Consider this function, which takes a string slice `s` and a delimiter `d`. Thsi functions aims to find the first occurance of `d`, and return the part of `s` that appears before the delimiter. There're two things worthy noting:
+There are times when multiple generic lifetimes are necessary, either in a function or in a struct. Consider this function, which takes a string slice `s` and a delimiter `d`. This function aims to find the first occurrence of `d`, and return the part of `s` that appears before the delimiter. There are two things worth noting:
 
 1.  the delimiter is also a string slice because it may contain multiple characters
-2.  right now this function only takes one generic lifetime `'a`, however this will raise problems which we will talk about later.
+2.  right now this function only takes one generic lifetime `'a`, however,this will raise problems, which we will discuss later.
 
 <!--listend-->
 
@@ -196,7 +196,7 @@ fn before_delimiter<'a>(s: &'a str, d: &'a str) -> &'a str {
 }
 ```
 
-Assume you write another function `before_char`, which works alike `before_delimiter`. The only difference is the it returns the part of string slice before an character.
+Assume you write another function `before_char`, which works like `before_delimiter`. The only difference is that it returns the part of thestring slice before a character.
 
 ```rust
 fn before_char(s: &str, c: char) -> &str {
@@ -212,13 +212,13 @@ fn main() {
 }
 ```
 
-Sadly the compiler would reject the function `before_char`:
+Sadly the compiler will reject the function `before_char`:
 
 > cannot return value referencing local variable `d`
 
-The reason of this error is, in function `before_delimiter`, the return value and two parameters have the same lifetime, when this function is called, the generic lifetime is substitited with a concrete liftime, which is the smaller lifetime of `s` and `d`. In this example, `before_delimiter` is called inside `before_char`, the smaller lifetime is the lifetime of the string reference converted from `c`: `&c.to_string()`. However, this lifetime is associated with a variable local to function `before_char()`.
+The reason for this error is that, in the function `before_delimiter`, the return value and two parameters have the same lifetime. When this function is called, the generic lifetime is substituted with a concrete lifetime, which is the smaller lifetime of `s` and `d`. In this example, `before_delimiter` is called inside `before_char`, and the smaller lifetime is the lifetime of the string reference converted from `c`: `&c.to_string()`. However, this lifetime is associated with a variable local to function `before_char()`.
 
-The solution to this problem is make the parameter in `before_delimiter` have two distinct lifetimes, and the return value should assign the same lifetime as `s`:
+The solution to this problem is to make the parameters in `before_delimiter` have two distinct lifetimes, and the return value should be assigned the same lifetime as `s`:
 
 ```rust
 fn before_delimiter<'a, 'b>(s: &'a str, d: &'b str) -> &'a str {
@@ -227,10 +227,10 @@ fn before_delimiter<'a, 'b>(s: &'a str, d: &'b str) -> &'a str {
 }
 ```
 
-This example teaches us that when assigning generic lifetime to parameters and return values, we should thing about which value the returned reference refers to. In `before_delimiter`, the returned reference and the paramerter `s` should points to the same value in the memory, so that they should have the same lifetime. With that in mind, that's look at another example.
+This example teaches us that when assigning generic lifetimes to parameters and return values, we should think about which value the returned reference refers to. In `before_delimiter`, the returned reference and the parameter `s` should point to the same value in  memory, which means they should share the same lifetime. With that in mind, let's look at another example.
 
 
-## <span class="section-num">7</span> A reference to a reference {#a-reference-to-a-reference}
+## A reference to a reference {#a-reference-to-a-reference}
 
 ```rust
 // ERROR, require lifetime annotation
@@ -260,12 +260,12 @@ fn main() {
 }
 ```
 
-What `strtok` does is try to find the delimiter in a string slice, if found returns the part of the string slice before the first occurence of the delimiter, and make the parameter points to what's left in the string slice. For example, if passe in `"hello world"` and `'o'` , this function should return "hell", and its parameter should points to `" world"` . The code won't be able to run for now because we need to add lifetime annotation to `strtok`. But before that, lets think about what's `&mut &str`.
+What `strtok` does is try to find the delimiter in a string slice. If found, it returns the part of the string slice before the first occurrence of the delimiter and makes the parameter point to what's left in the string slice. For example, if you pass in `"hello world"` and `'o'` , this function should return "hell", and its parameter should point to `" world"` . The code won't compile for now because we need to add lifetime annotations to `strtok`. But before that, let's think about what `&mut &str` means.
 
 
 ### &amp;mut &amp;str {#and-mut-and-str}
 
-The type `&mut &str` is a mutable reference to a shared string slice. Let's look at following example.
+The type `&mut &str` is a mutable reference to a shared string slice. Let's look at the following example.
 
 ```rust
 fn main() {
@@ -281,14 +281,14 @@ fn foo(s: &mut &str) {
 }
 ```
 
-1.  variables such as `a` and `b` are just named location in the stack.
-2.  `a` stores a reference to a shard string slice, you cane make `a` holding other reference because `a` is mutable.
-3.  `b` also stores a reference, in this case it's a reference to `a`. However, because `b` isn't mutable, you cannot make `b` holding other reference.
+1.  variables such as `a` and `b` are just named locations in the stack.
+2.  `a` stores a reference to a shared string slice; you can make `a` hold another reference because `a` is mutable.
+3.  `b` also stores a reference, in this case it's a reference to `a`. However, because `b` isn't mutable, you cannot make `b` hold another reference.
 
 
-### Add lifetiem annotation {#add-lifetiem-annotation}
+### Add lifetime annotation {#add-lifetime-annotation}
 
-There two lifetime in the parameter `s`: `&'a mut &'b str`. Lifetime `'b` denotes to how long the reference to the string slice lasts, lifetime `'a` how long the reference `s` will exists. Since the return value and the referene to the string slice(`'b` associated with) points to the same value in the heap, so that the return value should have the the lifetime `'b`. Because lifetime `'a` is not needed in the function, we can levae this lifetime annotation empty. Now the function signature of `strtok` shold look like this:
+There are two lifetimes in the parameter `s`: `&'a mut &'b str`. Lifetime `'b` denotes  how long the reference to the string slice lasts, and lifetime `'a` denotes how long the reference `s` will exist. Since the return value and the reference to the string slice(`'b` associated with) point to the same value in the heap,  the return value should have the  lifetime `'b`. Because lifetime `'a` isn't needed in the function, we can leave this lifetime annotation empty. Now the function signature of `strtok` should look like this:
 
 ```rust
 fn strtok(s: &mut &'a str, delimiter: char) -> 'a str { //.. }
