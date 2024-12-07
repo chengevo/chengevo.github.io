@@ -9,7 +9,7 @@ Lifetime is a complex and often confusing concept in Rust. When discussing lifet
 > 1.  The lifetime of a reference, corresponding to the span of time in which that reference is used.
 > 2.  The lifetime of a value, corresponding to the span of time before that value gets freed (or, put another way, before the destructor for the value runs).
 
-To distinguish the two, the lifetime of a value will be referred to as the\*scope of the value\*. The lifetime of a reference cannot outlive the scope of the value it refers to. Let’s see an example:
+To distinguish the two, the lifetime of a value will be referred to as the **scope of the value**. The lifetime of a reference cannot outlive the scope of the value it refers to. Let’s see an example:
 
 ```rust { linenos=true, linenostart=1, anchorlinenos=true, lineanchors=org-coderef--9c6c47 }
 fn main() {
